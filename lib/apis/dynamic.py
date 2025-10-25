@@ -16,6 +16,7 @@ from fastapi.responses import StreamingResponse
 import qrcode
 
 from . import PrettyJSONResponse
+from . import logger
 
 router = APIRouter()
 
@@ -41,11 +42,25 @@ def get_qr_code(uuid):
 
 
 @router.get("/uuid", summary = "Return a type 4 UUID.",
-    response_class=PrettyJSONResponse)
+    response_class=PrettyJSONResponse,
+    openapi_extra={
+        "x-kong-plugin-correlation-id": {
+            "config": {
+                "generator": "uuid#counter"
+            }
+        }
+    })
 async def uuid(request: Request):
 
     url = request.url._url
     uuid = uuid4()
+
+    kong_request_id = request.headers.get("Kong-Request-ID")
+    if kong_request_id:
+        logger.info(f"Kong-Request-ID: {kong_request_id}")
+    else:
+        logger.info("Kong-Request-ID header not found.")
+
 
     retval = {}
     retval["uuid"] = uuid
