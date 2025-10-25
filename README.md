@@ -1,97 +1,28 @@
 
-# FastAPI Httpbin
+# FastAPI Httpbin + OpenAPI specifications generation with Kong specific annotations
 
-<img src="./img/logo.png" align="right" />
+## Adding Server
 
-HTTP Endpoints for easy testing of your app.
+- The code  [Adding servers to the openapi spec](https://github.com/sagarmhatre-kong/fastapi-httpbin/commit/2b22982222c153be2c13a70ff48aeafa5787f2f9) will generate an openapi spec which the [deck file `openapi2kong` ](./openapi-spec/deck.sh) command will translate to one service with the upstream url  in the specification
 
-Built with the [FastAPI Framework for Python](https://fastapi.tiangolo.com/), this is heavily based on the original [Httpbin](https://httpbin.org/) website.
+```yaml
+servers:
+- description: Local server
+  url: http://host.docker.internal:8080
+```
 
-Play with it in production at [https://httpbin.dmuth.org/](https://httpbin.dmuth.org/)  Documentation for all endpoints is right on the front page of the site.  What are you waiting for? :-)
+## Adding plugins
 
-Also consider these add-ons I wrote which make use of the API:
+`openapi2kong` allows you to configure plugins directly in your OpenAPI specification by providing an `x-kong-plugin-PLUGIN-NAME` annotation at the root level to add it to the Service, at the path level to add it to all Routes on that path, or on an operation to add it to a specific Route.
 
-- [Dead Simple QR Code Generator](https://httpbin.dmuth.org/qrcode/)
-- [Test Password Managers like 1Password and BitWarden here](https://httpbin.dmuth.org/test-password-manager-form/)
+To understand how to modify your python code to generate these annotations, refer the below commits : 
+- Adding [Correlation ID](https://developer.konghq.com/plugins/correlation-id/) plugin [to a route](https://github.com/sagarmhatre-kong/fastapi-httpbin/commit/afeb80688659bf3c7d35cfe66848b795caf0c5b8) 
+- Adding Dynamic [request-validator plugin](https://developer.konghq.com/plugins/request-validator/) configuration [to a route ](https://github.com/sagarmhatre-kong/fastapi-httpbin/commit/aeefe8277ba9a4b2c2ee3a3f01b66820a121cfd8#diff-979f6e33a76c7421322f1141e867057d533ed44cbddaa8d901dd6b5fa4c07066R13-R60)
+  - this tells openapi2kong to automatically inject the schema for the current endpoint when generating a Kong Gateway declarative configuration file so that the plugin applies the validation appropriately for each request 
 
-## Differences between this app and Httpbin
+## Further Reading
+- [Adding plugins](https://developer.konghq.com/deck/file/openapi2kong/#adding-plugins)
 
-- 100% unit test coverage of all endpoints.
-- Ensured that [documentation](https://httpbin.dmuth.org/) 100% matches the responses returned.
-- Ensured that all values are now sanity checked
-- All endpoints with mandatory parameters now have examples in the documentation in order to reduce friction for test usage.
-- Fixed a few bugs found in the implementation of the `/cache` endpoints in Httpbin.
-- Several endpoints have `GET` version only, as I did not see the point to supporting every possible HTTP verb--I felt that this just made the Swagger documentation unwieldly. (This is subject to change based on usage patters and demand)
+## Acknowledgements
 
-
-## Development
-
-To run FastAPI Httpbin in development mode so that changes to the underlying Python files
-are automatically reloaded:
-
-- Directly
-  - `pip install -r ./requirements.txt`
-  - `PORT=9000 ./bin/dev.sh` - Run server in dev mode on port 9000, so that changes to the Python scripts cause them to be reloaded
-- Or, in Docker if you'd prefer:
-  - Build the Docker container
-    - `./bin/docker-build.sh` 
-  - Start the Docker container and spawn a bash shell so that scripts can be run from inside the container.
-    - `./bin/docker-dev.sh` 
-  - Now that you're inside the container:
-    - Note that the host directory lives in `/mnt/`.
-      - `cd /mnt`
-    - Then run `./pytest.sh`
-      - Run `./pytest.sh -v` to view individual test names as they run
-      - Run `./pytest.sh -k NAME` to limit tests to a specific test by name
-    - Or run `./bin/dev.sh`, however changes to files may not be caught.
-      - Access the website at [http://localhost:8000/](http://localhost:8000/)
-    - Updating dependencies
-      - Remove versions from `requirements.txt`
-      - `./bin/docker-build.sh && ./bin/docker-dev.sh`
-        - This will re-download the latest requirements
-      - `cd /mnt`
-      - `./pytest.sh -v`
-        - Make sure unit tests pass
-      - `pip freeze > ./requirements.txt`
-        - Save the latest versions to the requirements file
-
-## Deployment
-
-- Bump version number in `./lib/fastapi.py`.
-- `./bin/docker-build.sh` 
-  - Build the Docker container
-- `./bin/deploy.sh` 
-  - This will run `fly deploy` to deploy the container on Fly.io.
-- `./bin/docker-push.sh` 
-  - This will push the Docker image to Docker Hub
-
-
-## In production
-
-- `./bin/prod.sh` - Run in production mode, so that changes made to the Python scripts do NOT cause reloads.
-- `./bin/docker-prod.sh` - Run the Docker container in production mode (detached from the console).
-
-
-## FAQ: Are there any bugs?
-
-### How about Kubernetes Support?
-
-Look in [k8s/README.md](k8s/README.md) for Kubernetes instructions.  I built that out using
-k3s with k3d, but those files should work reasonably well in a full blown k8s environment.
-
-
-### Docker-in-Vagrant Issues
-
-If you are [running Docker from Vagrant](https://github.com/dmuth/docker-in-vagrant), the app won't
-behave right when run in Development Mode inside of a container.  Specifically, the functionality of FastAPI to reload itself when a file is changed does not seem to work. For now, the workaround is to restart the FastAPI server when new changes are to be tested, or to not run it in a container in the first place.
-
-Production use is unaffected.
-
-
-## Get In Touch
-
-If you run into any problems, feel free to [open an issue](https://github.com/dmuth/fastapi-httpbin/issues).
-
-Otherwise, you can find me [on Twitter](https://twitter.com/dmuth), [Facebook](https://facebook.com/dmuth), or drop me an email: **doug.muth AT gmail DOT com**.
-
-
+This code has been forked from https://github.com/dmuth/fastapi-httpbin
