@@ -36,7 +36,7 @@ app = FastAPI(docs_url = "/", redoc_url = None,
     openapi_tags = tags_metadata,
     servers = [
         {
-            "url": "http://localhost:8080",
+            "url": "http://host.docker.internal:8080",
             "description": "Local server"
         }
     ]
