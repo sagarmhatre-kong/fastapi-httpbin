@@ -33,7 +33,13 @@ app = FastAPI(docs_url = "/", redoc_url = None,
     description = description,
     version = app_version,
     swagger_ui_parameters = {"docExpansion":"none"},
-    openapi_tags = tags_metadata
+    openapi_tags = tags_metadata,
+    servers = [
+        {
+            "url": "http://localhost:8080",
+            "description": "Local server"
+        }
+    ]
     )
 
 #
