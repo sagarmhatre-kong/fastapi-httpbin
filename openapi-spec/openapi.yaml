@@ -43,6 +43,25 @@ components:
           type: array
       title: HTTPValidationError
       type: object
+    PersonData:
+      properties:
+        age:
+          description: Age of the person
+          maximum: 100.0
+          minimum: 0.0
+          title: Age
+          type: integer
+        name:
+          description: Name of the person
+          maxLength: 50
+          minLength: 3
+          title: Name
+          type: string
+      required:
+      - name
+      - age
+      title: PersonData
+      type: object
     QRCode:
       properties:
         border:
@@ -159,6 +178,12 @@ paths:
       - Anything
     post:
       operationId: post_anything_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonData'
+        required: true
       responses:
         '200':
           content:
@@ -166,9 +191,18 @@ paths:
               schema:
                 type: string
           description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
       summary: Returns anything that is passed into the request.
       tags:
       - Anything
+      x-kong-plugin-request-validator:
+        config:
+          verbose_response: true
     put:
       operationId: put_anything_put
       responses:
@@ -270,7 +304,8 @@ paths:
             example: '{"cookie1": "value1", "cookie2": "value2", "cookie3": "value3"}'
             schema:
               anyOf:
-              - type: object
+              - additionalProperties: true
+                type: object
               - type: 'null'
               title: Cookies
         required: true
@@ -1215,6 +1250,9 @@ paths:
       summary: Return a type 4 UUID.
       tags:
       - Dynamic Data
+      x-kong-plugin-correlation-id:
+        config:
+          generator: uuid#counter
   /uuid/qrcode:
     get:
       operationId: uuid_qrcode_uuid_qrcode_get
@@ -1247,7 +1285,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
           description: Validation Error
-      summary: Return a QR code of a *specified* type 5 UUID.
+      summary: Return a QR code of a *specified* type 4 UUID.
       tags:
       - Dynamic Data
   /version:
@@ -1275,6 +1313,9 @@ paths:
       summary: Returns an XML document
       tags:
       - Response Formats
+servers:
+- description: Local server
+  url: http://host.docker.internal:8080
 tags:
 - description: Testing different HTTP verbs.
   name: HTTP Methods

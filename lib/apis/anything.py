@@ -6,11 +6,17 @@ import json
 
 from fastapi import APIRouter
 from fastapi import FastAPI, Header, Request
+from pydantic import BaseModel, Field
 
 from . import logger
 from . import PrettyJSONResponse
 
 router = APIRouter()
+
+
+class PersonData(BaseModel):
+    name: str = Field(..., min_length=3, max_length=50, description="Name of the person")
+    age: int = Field(..., ge=0, le=100, description="Age of the person")
 
 data_default = {
     "message": "No JSON/bad JSON supplied.  If you used Swagger, you'll need to use curl on the CLI with the -d option instead for non-GET methods, or GET-method data for GET."
@@ -51,18 +57,26 @@ async def get(request: Request):
     return(retval)
 
 
-@router.post("/anything", summary = "Returns anything that is passed into the request.",
-    response_class=PrettyJSONResponse)
+@router.post("/anything", 
+    summary = "Returns anything that is passed into the request.",
+    response_class=PrettyJSONResponse,
+    openapi_extra={
+        "x-kong-plugin-request-validator": {
+            "config": {
+                "verbose_response": True 
+            }
+        }
+    })
 @router.post("/any", summary = "Returns anything that is passed into the request.",
     response_class=PrettyJSONResponse, include_in_schema = False)
-async def post(request: Request):
-
-    data = data_default
+async def post(request: Request, person_data: PersonData):
 
     try:
-        data = await request.json()
-    except json.decoder.JSONDecodeError as e:
-        logger.warning(f"{__name__}:post(): Caught error deserializing JSON: {e}")
+        data = person_data.model_dump()
+        print("Request body:", data)
+    except AttributeError:
+        # Fallback for older Pydantic versions
+        data = person_data.dict()
 
     retval = core(request)
     retval["data"] = data
