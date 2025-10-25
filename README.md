@@ -1,6 +1,13 @@
 
 # FastAPI Httpbin + OpenAPI specifications generation with Kong specific annotations
 
+## Run Locally
+```sh
+python3 --version
+# Python 3.9.6
+python3 -m uvicorn main:app --host 0.0.0.0 --port 8080 --reload
+```
+
 ## Adding Server
 
 - The code  [Adding servers to the openapi spec](https://github.com/sagarmhatre-kong/fastapi-httpbin/commit/2b22982222c153be2c13a70ff48aeafa5787f2f9) will generate an openapi spec which the [deck file `openapi2kong` ](./openapi-spec/deck.sh) command will translate to one service with the upstream url  in the specification
