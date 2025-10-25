@@ -1,6 +1,7 @@
 
 import json, typing
 import logging
+from typing import Optional, Union
 
 from fastapi import Query
 
@@ -37,7 +38,7 @@ class PrettyJSONResponse(Response):
 class RedirectQueryParams():
 
     def __init__(self,
-        code: int | None = Query(
+        code: Optional[int] = Query(
             default = 302, 
             description = "Status code passed in from a previous redirect", 
             example = 301)

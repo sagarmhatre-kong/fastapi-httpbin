@@ -7,6 +7,7 @@ import json
 from uuid import uuid4, UUID
 import asyncio
 from datetime import datetime, timezone
+from typing import Optional
 
 from fastapi import APIRouter, HTTPException
 from fastapi import FastAPI, Header, Request, Query, Path, Response
@@ -96,7 +97,7 @@ async def uuid_qrcode_qrcode(uuid: str):
 @router.get("/delay/{seconds}", summary = "Return a delayed response (max of 10 seconds).",
     response_class=PrettyJSONResponse)
 async def delay(request: Request, 
-    debug: bool | None = None, 
+    debug: Optional[bool] = None, 
     seconds: int = Path(example = 3)):
 
     retval = {}
@@ -204,7 +205,7 @@ async def streamer_rate(n, rate, debug):
 @router.get("/stream/chars/{n}/{rate}", 
     summary = "Stream n bytes (max 100K) at a rate of rate per second. Max time is 20 seconds.")
 async def stream_chars(request: Request, 
-    debug: bool | None = None, 
+    debug: Optional[bool] = None, 
     n: int = Path(example = 128), 
     rate: int = Path(example = 50)):
 
@@ -303,7 +304,7 @@ async def streamer_rate_complete(n, rate, debug):
 @router.get("/stream/chars/complete/{n}/{rate}", 
     summary = "Stream n bytes (max 100K) at a rate of rate per second. Any outstanding characters due to a low rate will be sent at the very end.  Max time is 10 seconds.")
 async def stream_chars_complete(request: Request, 
-    debug: bool | None = None, 
+    debug: Optional[bool] = None, 
     n: int = Path(example = 128), 
     rate: int = Path(example = 50)):
 
