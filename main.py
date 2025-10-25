@@ -1,10 +1,11 @@
 
 import platform
+import yaml
 
 from typing import Union
 
 from fastapi import FastAPI, Request, Response
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -69,6 +70,20 @@ async def add_process_time_header(request: Request, call_next):
     response.headers["X-app-hostname"] = platform.node()
     return response
 
+
+@app.get('/openapi.yaml', summary = "OpenAPI spec in YAML format", tags = ["Meta"],
+    response_class = PlainTextResponse,
+    responses={
+        200: {
+            "content": {"text/plain": {}},
+            "description": "Return OpenAPI specification in YAML format.",
+        }
+    }
+    )
+async def openapi_yaml():
+    openapi_json = app.openapi()
+    yaml_str = yaml.dump(openapi_json, default_flow_style=False)
+    return PlainTextResponse(content=yaml_str, media_type="text/plain")
 
 favicon_path = "static/favicon.jpg"
 @app.get('/favicon.ico', summary = "Favicon endpoint", tags = ["Images"],
