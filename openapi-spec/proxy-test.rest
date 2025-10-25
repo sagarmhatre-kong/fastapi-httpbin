@@ -1,0 +1,61 @@
+### Testing proxy
+### Test /anything POST
+POST http://localhost:8000/anything
+Content-Type: application/json
+
+{
+    "name": "John",
+    "age": 20
+}
+
+### Test /anything POST (invalid)
+POST http://localhost:8000/anything
+Content-Type: application/json
+
+{
+    "name": "Jo",
+    "age": 20
+}
+
+
+
+
+
+
+
+### Test /anything POST (invalid age)
+POST http://localhost:8000/anything
+Content-Type: application/json
+
+{
+    "name": "Jonny",
+    "age": 120
+}
+
+### Testing upstream
+### Test /anything POST
+POST http://localhost:8080/anything
+Content-Type: application/json
+
+{
+    "name": "John",
+    "age": 20
+}
+
+### Test /anything POST (invalid)
+POST http://localhost:8080/anything
+Content-Type: application/json
+
+{
+    "name": "Jo",
+    "age": 20
+}
+
+### Test /anything POST (invalid age)
+POST http://localhost:8080/anything
+Content-Type: application/json
+
+{
+    "name": "Jonny",
+    "age": 120
+}
